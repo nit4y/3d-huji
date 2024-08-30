@@ -86,19 +86,19 @@ def calculate_height(heights_in_pixels, foot_locations, plane_equation, camera_p
 
 if __name__ == "__main__":
     camera_parameters = {
-        'intrinsic_matrix': np.array([[3200, 0, 1600],
-                                        [0, 3200, 1200],
-                                        [0,  0,  1]]),
+        'intrinsic_matrix': np.array([[1920, 5000, 1600],
+                                        [1697, 4035, 1200],
+                                        [300,  5000,  1]]),
         'rotation_matrix': np.eye(3),  # Assuming no rotation for simplicity
-        'translation_vector': np.array([0, 0, 1.5])  # Camera at (0,0,1.5) height, adjust as needed
+        'translation_vector': np.array([0, 0, 1.7])  # Camera at (0,0,1.5) height, adjust as needed
     }
     
     
     # calibrate_camera()
     height = calculate_height(
-        [100, 150, 120], 
-        [(100, 100), (200, 200), (300, 300)], 
-        [1, 1, 1, 1], 
+        [450, 436, 244, 204], 
+        [(270, 964), (408, 844), (444, 768), (494, 744)], 
+        [0, 1, 0.57735, 0], 
         camera_parameters)
     
     print(height)
