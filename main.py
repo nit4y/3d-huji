@@ -1,32 +1,54 @@
 
 import cv2
 import numpy as np
+import os
 
 
 def calibrate_camera():
     # Define the criteria and object points for calibration
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    objp = np.zeros((6*7,3), np.float32)
-    objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
+    objp = np.zeros((3*3, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:3, 0:3].T.reshape(-1, 2)
 
     objpoints = [] # 3d point in real world space
     imgpoints = [] # 2d points in image plane.
 
     # Read images and find chessboard corners
-    for i in range(9):  # Example for 20 images
-        img = cv2.imread(f'cal/cal{i+1}.jpeg')
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        ret, corners = cv2.findChessboardCorners(gray, (7,6), None)
+    # Define the directory path
+    directory_path = './cal'
 
-        if ret == True:
-            objpoints.append(objp)
-            imgpoints.append(corners)
+    # Loop over all files in the directory
+    for filename in os.listdir(directory_path):
+        # Check if the filename starts with 'Whatsapp'
+        if filename.startswith('WhatsApp'):
+            img = cv2.imread(directory_path + '/' + filename)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-            # Draw and display the corners
-            img = cv2.drawChessboardCorners(img, (7,6), corners, ret)
-            cv2.imshow('img', img)
-            cv2.waitKey(500)
+            ret, corners = cv2.findChessboardCorners(gray, (3, 3), None)
+
+            if ret == True:
+                objpoints.append(objp)
+                imgpoints.append(corners)
+
+                # Draw and display the corners
+                img = cv2.drawChessboardCorners(img, (3, 3), corners, ret)
+                cv2.imshow('img', img)
+                cv2.waitKey(500)
+    # for i in range(9):  # Example for 20 images
+    #     img = cv2.imread(f'cal/cal{i+1}.jpeg')
+    #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #
+    #     ret, corners = cv2.findChessboardCorners(gray, (7,6), None)
+    #
+    #     if ret == True:
+    #         objpoints.append(objp)
+    #         imgpoints.append(corners)
+    #
+    #         # Draw and display the corners
+    #         img = cv2.drawChessboardCorners(img, (7,6), corners, ret)
+    #         cv2.imshow('img', img)
+    #         cv2.waitKey(500)
 
     cv2.destroyAllWindows()
 
@@ -36,7 +58,7 @@ def calibrate_camera():
     print("Intrinsic matrix:\n", mtx)
     print("Distortion coefficients:\n", dist)
     
-    return mtx, 
+    return mtx
 
 
 def calculate_height(heights_in_pixels, foot_locations, plane_equation, camera_parameters):
@@ -63,7 +85,7 @@ def calculate_height(heights_in_pixels, foot_locations, plane_equation, camera_p
         # Compute the intersection of the ray with the plane
         t_part_1 = -(translation_vector.T.dot(np.array([a, b, c])) + d)
         t_part_2 = (ray_direction.T.dot(np.array([a, b, c])))
-        t =  t_part_1/t_part_2 
+        t = t_part_1/t_part_2
         foot_3d = translation_vector + t * ray_direction
 
         # Estimate the head location in 3D by adding the height in pixels
@@ -92,8 +114,9 @@ if __name__ == "__main__":
         'rotation_matrix': np.eye(3),  # Assuming no rotation for simplicity
         'translation_vector': np.array([0, 0, 1.7])  # Camera at (0,0,1.5) height, adjust as needed
     }
-    
-    
+
+    camera_parameters['intrinsic_matrix'] = calibrate_camera()
+
     # calibrate_camera()
     height = calculate_height(
         [450, 436, 244, 204], 
