@@ -7,8 +7,11 @@ import os
 def calibrate_camera():
     # Define the criteria and object points for calibration
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    objp = np.zeros((3*3, 3), np.float32)
-    objp[:, :2] = np.mgrid[0:3, 0:3].T.reshape(-1, 2)
+
+    BOARD_DIMS = (3,3)
+
+    objp = np.zeros((BOARD_DIMS[0]*BOARD_DIMS[1], BOARD_DIMS[0]), np.float32)
+    objp[:, :2] = np.mgrid[0:BOARD_DIMS[0], 0:BOARD_DIMS[1]].T.reshape(-1, 2)
 
     objpoints = [] # 3d point in real world space
     imgpoints = [] # 2d points in image plane.
@@ -25,14 +28,14 @@ def calibrate_camera():
             img = cv2.imread(directory_path + '/' + filename)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-            ret, corners = cv2.findChessboardCorners(gray, (3, 3), None)
+            ret, corners = cv2.findChessboardCorners(gray, BOARD_DIMS, None)
 
             if ret == True:
                 objpoints.append(objp)
                 imgpoints.append(corners)
 
                 # Draw and display the corners
-                img = cv2.drawChessboardCorners(img, (3, 3), corners, ret)
+                img = cv2.drawChessboardCorners(img, BOARD_DIMS, corners, ret)
                 cv2.imshow('img', img)
                 cv2.waitKey(500)
     # for i in range(9):  # Example for 20 images
